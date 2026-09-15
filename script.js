@@ -461,7 +461,7 @@ function unlockRebirth() {
 }
 
 function rebirthCost() {
-    return 50 * (4 ** game.rebirths);
+    return 50 * (1.1 ** game.rebirths);
 }
 
 function rebirth() {
