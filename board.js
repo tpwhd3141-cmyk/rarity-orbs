@@ -106,7 +106,7 @@ function checkCollisions() {
             //console.log(bodies[i].rarity)
             let slotMultiplier = 1;
             if (bodies[i].position.x < 66) {slotMultiplier = 2;}
-            else if (bodies[i].position.x > 155 && bodies[i].position.x < 244) {slotMultiplier = 1.5;}
+            else if (bodies[i].position.x > 155 && bodies[i].position.x < 244) {slotMultiplier = 10000;}
             else if (bodies[i].position.x > 333) {slotMultiplier = 2;}
             game.money += rarityValues[bodies[i].rarity - 1] * game.moneyMultiplier * slotMultiplier * (game.boostTimes[0] ? 2 : 1);
             updateText()
