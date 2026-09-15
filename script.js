@@ -1,9 +1,9 @@
 const illions = ["thousand", "million", "billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion", "octillion", "nonillion", "decillion", "undecillion", "duodecillion", "tredecillion", "quattuordecillion", "quindecillion", "sexdecillion", "septendecillion", "octodecillion", "novemdecillion", "vigintillion"]
 const illionsShort = ["K", "M", "B", "T", "Qa", "Qt", "Sx", "Sp", "Oc", "No", "Dc", "UDc", "DDc", "TDc", "QaDc", "QiDc", "SxDc", "SpDc", "OcDc", "NoDc", "Vg"]
-const rarities = [1, 3, 10, 50, 250, 1200, 7000, 30000, 140000, 750000, 3.5e6, 1.8e7, 9e7, 5e8, Infinity, Infinity, Infinity];
+const rarities = [1, 3, 10, 50, 250, 1200, 7000, 30000, 140000, 750000, 3.5e6, 1.8e7, 9e7, 5e8, 5e10, 5e11, 5e12];
 const rarityNames = ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary', 'Mythical', 'Exotic', 'Ethereal', 'Galactic', 'Transcendental', 'Godly', 'Demonic', 'Void', 'Antimatter', 'UNDEFINED 1', 'UNDEFINED 2', 'UNDEFINED 3'];
-const raritySizes = [7, 8, 9, 10, 11, 12, 13, 14, 14, 14, 14, 14, 14, 14]
-const rarityValues = [1, 3, 10, 30, 100, 300, 1000, 3000, 10000, 100000, 1e6, 1e7, 1e8, 1e9, 0, 0, 0]
+const raritySizes = [7, 8, 9, 10, 11, 12, 13, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14]
+const rarityValues = [1, 3, 10, 30, 100, 300, 1000, 3000, 10000, 100000, 1e6, 1e7, 1e8, 1e9, 1e11, 1e12, 1e13]
 const rarityColours = ['#bbbbbb', '#bbbbbb', '#45bb45', '#45bb45', '#4545bb', '#4545bb', '#8845bb', '#8845bb', '#ff8800', '#ff8800', '#ff0000', '#ff0000', '#ff7b00', '#bb24bb', '#4800ff', '#000000', '#8200ff', '#000042', '#82ff49', '#14c98d', '#ffffff', '#ffe500', '#ff0000', '#5c0000', '#333333', '#111111', '#c307eb', '#11053a']
 
 window.isDevVersion = window.location.href.indexOf('demonin.com') == -1
@@ -213,7 +213,7 @@ function updateText() {
     document.getElementsByClassName("spawnerLuck")[0].innerText = "Luck: x" + format(game.spawnerLuck[0],2);
     document.getElementsByClassName("spawnerLuck")[1].innerText = "Luck: x" + format(game.spawnerLuck[1],2);
     document.getElementsByClassName("spawnerLuck")[2].innerText = "Luck: x" + format(game.spawnerLuck[2],2);
-    document.getElementById('rebirthText').innerText = "You have rebirthed " + format(game.rebirths) + " times\nRebirth luck multiplier: x" + format(2 ** game.rebirths)
+    document.getElementById('rebirthText').innerText = "You have rebirthed " + format(game.rebirths) + " times\nCurrent base luck: x" + format(game.baseLuck,2)
 }
 updateText()
 setInterval(updateText, 200);
@@ -252,7 +252,7 @@ function updateAllUpgradeText() {
         document.getElementsByClassName("decreaseIntervalButton")[i-1].innerHTML = "Decrease interval<br>" + (game.spawnIntervals[i-1]/1000).toFixed(3) + "s - " + (game.spawnIntervals[i-1]/1000*0.95).toFixed(3)  + "s<br>Costs $" + format(game.upgradeCosts[2+i])
         document.getElementsByClassName("increaseSpawnerLuckButton")[i-1].innerHTML = "Increase luck<br>x" + format(game.spawnerLuck[i-1],2) + " - x" + format(game.spawnerLuck[i-1]*1.1,2) + "<br>Costs $" + format(game.upgradeCosts[5+i])
     }
-    document.getElementById('rebirthButton').innerHTML = "<b>Rebirth</b><br>Costs $" + format(4 ** game.rebirths * 10000) + "<br>Luck x" + format(2 ** game.rebirths) + " - x" + format(2 ** (game.rebirths + 1))
+    document.getElementById('rebirthButton').innerHTML = "<b>Rebirth</b><br>Costs " + format(rebirthCost()) + " diamonds<br>Luck x" + format(game.baseLuck,2) + " - x" + format(game.baseLuck*2,2)
 }
 
 function updateVisuals() {
@@ -460,23 +460,17 @@ function unlockRebirth() {
     }
 }
 
+function rebirthCost() {
+    return 50 * (4 ** game.rebirths);
+}
+
 function rebirth() {
-    if (game.money > 4 ** game.rebirths * 10000) {
+    if (game.diamonds >= rebirthCost()) {
+        game.diamonds -= rebirthCost();
         game.rebirths++
-        game.money = 0
-        game.moneyMultiplier = 1
-        game.baseLuck = 2 ** game.rebirths
-        game.diamonds = 0
-        game.diamondChance = 0.005
-        game.spawnIntervals = [1000, 2000, 4000]
-        game.spawnerLuck = [1, 1.5, 2]
-        game.upgradeCosts = [50, 100, 500, 250, 1500, 100000, 2000, 8000, 600000]
-        game.boostTimes = [0,0,0]
-        document.getElementsByClassName("boostText")[0].style.color = "#bbb"
-        document.getElementsByClassName("boostText")[0].innerText = "2x money gain - 0:00 (not active)"
-        document.getElementsByClassName("boostText")[1].style.color = "#bbb"
-        document.getElementsByClassName("boostText")[1].innerText = "2x luck - 0:00 (not active)"
-        document.getElementsByClassName("boostText")[2].innerText = "Duplicate cooldown: " + game.boostTimes[2] + "s"
+        game.baseLuck *= 2
+        // money, moneyMultiplier, diamondChance, spawnIntervals, spawnerLuck and upgradeCosts
+        // are intentionally left untouched so upgrades persist through rebirth.
         updateRarityList()
         deleteAllOrbs()
         updateText()
